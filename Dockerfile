@@ -14,6 +14,7 @@ COPY requirements.txt requirements-dev.txt ./
 RUN pip install -r requirements-dev.txt
 
 COPY . .
+RUN python manage.py collectstatic --noinput
 
 RUN adduser --disabled-password --gecos "" app && chown -R app:app /app
 USER app
