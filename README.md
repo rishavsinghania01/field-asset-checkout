@@ -57,6 +57,10 @@ docker compose logs worker --tail 20
 
 Stop everything: `docker compose down` (add `-v` to drop the database volume).
 
+If port 8000 is already taken on your machine, pick another host port:
+`APP_PORT=8080 docker compose up --build -d` and use `localhost:8080` in the curl commands.
+Postgres and Redis are not published to the host at all, so they cannot clash with a local install.
+
 ## Running locally without Docker
 
 You need a PostgreSQL 16 and a Redis reachable from your machine.

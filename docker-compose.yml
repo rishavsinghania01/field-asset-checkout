@@ -24,8 +24,6 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
-    ports:
-      - "5432:5432"
 
   redis:
     image: redis:7-alpine
@@ -39,7 +37,7 @@ services:
     build: .
     environment: *app-env
     ports:
-      - "8000:8000"
+      - "${APP_PORT:-8000}:8000"
     depends_on:
       db:
         condition: service_healthy
