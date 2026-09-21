@@ -18,8 +18,9 @@ def test_seed_meets_assignment_minimums():
 
     open_overdue = CheckOut.objects.filter(returned_at__isnull=True, due_at__lt=now)
     assert open_overdue.count() >= 2
-    assert CheckOut.objects.filter(returned_at__isnull=False, returned_at__lte=models_f("due_at")).count() >= 2
-    assert CheckOut.objects.filter(returned_at__isnull=False, returned_at__gt=models_f("due_at")).count() >= 1
+    returned = CheckOut.objects.filter(returned_at__isnull=False)
+    assert returned.filter(returned_at__lte=models_f("due_at")).count() >= 2  # on time
+    assert returned.filter(returned_at__gt=models_f("due_at")).count() >= 1  # late
 
     # Status is consistent with history: every open check-out's asset is CHECKED_OUT.
     for co in CheckOut.objects.filter(returned_at__isnull=True).select_related("asset"):

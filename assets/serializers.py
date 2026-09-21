@@ -39,9 +39,7 @@ class AssetDetailSerializer(AssetSerializer):
         # this does not hit the database again per asset.
         open_checkouts = getattr(obj, "open_checkouts", None)
         if open_checkouts is None:
-            open_checkouts = list(
-                obj.checkouts.filter(returned_at__isnull=True).select_related("employee")
-            )
+            open_checkouts = list(obj.checkouts.filter(returned_at__isnull=True).select_related("employee"))
         if not open_checkouts:
             return None
         return CurrentHolderSerializer(open_checkouts[0].employee).data
@@ -80,9 +78,7 @@ class CheckOutCreateSerializer(serializers.Serializer):
         if value <= now:
             raise serializers.ValidationError("due_at must be in the future.")
         if value > now + timedelta(days=MAX_LOAN_DAYS):
-            raise serializers.ValidationError(
-                f"due_at must be no more than {MAX_LOAN_DAYS} days from now."
-            )
+            raise serializers.ValidationError(f"due_at must be no more than {MAX_LOAN_DAYS} days from now.")
         return value
 
 

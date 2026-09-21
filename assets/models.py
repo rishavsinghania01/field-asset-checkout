@@ -17,9 +17,7 @@ class Asset(models.Model):
     asset_tag = models.CharField(max_length=32, unique=True, db_index=True)
     name = models.CharField(max_length=120)
     category = models.CharField(max_length=16, choices=Category.choices)
-    status = models.CharField(
-        max_length=16, choices=Status.choices, default=Status.AVAILABLE
-    )
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.AVAILABLE)
     purchase_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -45,12 +43,8 @@ class Employee(models.Model):
 
 
 class CheckOut(models.Model):
-    asset = models.ForeignKey(
-        Asset, on_delete=models.PROTECT, related_name="checkouts"
-    )
-    employee = models.ForeignKey(
-        Employee, on_delete=models.PROTECT, related_name="checkouts"
-    )
+    asset = models.ForeignKey(Asset, on_delete=models.PROTECT, related_name="checkouts")
+    employee = models.ForeignKey(Employee, on_delete=models.PROTECT, related_name="checkouts")
     checked_out_at = models.DateTimeField(auto_now_add=True)
     due_at = models.DateTimeField()
     returned_at = models.DateTimeField(null=True, blank=True)
@@ -88,9 +82,7 @@ class CheckOut(models.Model):
 
 
 class OverdueNotice(models.Model):
-    checkout = models.ForeignKey(
-        CheckOut, on_delete=models.CASCADE, related_name="notices"
-    )
+    checkout = models.ForeignKey(CheckOut, on_delete=models.CASCADE, related_name="notices")
     notice_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
 

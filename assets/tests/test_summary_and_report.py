@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone as dt_timezone
+from datetime import UTC, datetime, timedelta
 from unittest import mock
 
 import pytest
@@ -12,7 +12,7 @@ from .conftest import make_asset, make_employee
 
 pytestmark = pytest.mark.django_db
 
-NOW = datetime(2026, 9, 21, 12, 0, 0, tzinfo=dt_timezone.utc)
+NOW = datetime(2026, 9, 21, 12, 0, 0, tzinfo=UTC)
 
 
 def make_checkout(asset, employee, *, out_days_ago, due_in_days, returned_days_ago=None):

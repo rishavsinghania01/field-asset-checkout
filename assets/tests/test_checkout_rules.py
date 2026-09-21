@@ -76,10 +76,10 @@ def test_rule3_fourth_open_checkout_is_409(client, employee):
 @pytest.mark.parametrize(
     "delta, expected",
     [
-        (timedelta(days=-1), 400),      # past
-        (timedelta(seconds=-1), 400),   # just past
-        (timedelta(days=31), 400),      # beyond 30 days
-        (timedelta(minutes=5), 201),    # near future
+        (timedelta(days=-1), 400),  # past
+        (timedelta(seconds=-1), 400),  # just past
+        (timedelta(days=31), 400),  # beyond 30 days
+        (timedelta(minutes=5), 201),  # near future
         (timedelta(days=29, hours=23), 201),
     ],
 )

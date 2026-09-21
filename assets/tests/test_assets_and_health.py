@@ -70,9 +70,7 @@ def test_detail_current_holder(client):
     assert resp.status_code == 200
     assert resp.json()["current_holder"] is None
 
-    CheckOut.objects.create(
-        asset=asset, employee=emp, due_at=timezone.now() + timezone.timedelta(days=3)
-    )
+    CheckOut.objects.create(asset=asset, employee=emp, due_at=timezone.now() + timezone.timedelta(days=3))
     asset.status = "CHECKED_OUT"
     asset.save()
 

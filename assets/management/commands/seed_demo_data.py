@@ -124,9 +124,7 @@ class Command(BaseCommand):
             assets[tag].status = Asset.Status.MAINTENANCE
             assets[tag].save(update_fields=["status", "updated_at"])
 
-        user, _ = get_user_model().objects.get_or_create(
-            username=API_USERNAME, defaults={"is_staff": True}
-        )
+        user, _ = get_user_model().objects.get_or_create(username=API_USERNAME, defaults={"is_staff": True})
         token, _ = Token.objects.get_or_create(user=user)
 
         open_count = CheckOut.objects.filter(returned_at__isnull=True).count()

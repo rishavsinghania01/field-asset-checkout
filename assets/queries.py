@@ -38,9 +38,7 @@ def overdue_checkouts(now: datetime | None = None) -> QuerySet[CheckOut]:
         open_checkouts()
         .filter(due_at__lt=now)
         .select_related("asset", "employee")
-        .annotate(
-            overdue_for=ExpressionWrapper(Value(now) - F("due_at"), output_field=DurationField())
-        )
+        .annotate(overdue_for=ExpressionWrapper(Value(now) - F("due_at"), output_field=DurationField()))
         .order_by("due_at", "id")
     )
 
