@@ -1,6 +1,9 @@
+from datetime import timedelta
+
+from django.utils import timezone
 from rest_framework import serializers
 
-from .models import Asset, Employee
+from .models import Asset, CheckOut, Employee
 
 
 class CurrentHolderSerializer(serializers.ModelSerializer):
@@ -42,3 +45,47 @@ class AssetDetailSerializer(AssetSerializer):
         if not open_checkouts:
             return None
         return CurrentHolderSerializer(open_checkouts[0].employee).data
+
+
+MAX_LOAN_DAYS = 30
+
+
+class CheckOutSerializer(serializers.ModelSerializer):
+    asset_tag = serializers.CharField(source="asset.asset_tag", read_only=True)
+    employee_code = serializers.CharField(source="employee.employee_code", read_only=True)
+
+    class Meta:
+        model = CheckOut
+        fields = (
+            "id",
+            "asset",
+            "asset_tag",
+            "employee",
+            "employee_code",
+            "checked_out_at",
+            "due_at",
+            "returned_at",
+            "condition_note",
+        )
+        read_only_fields = fields
+
+
+class CheckOutCreateSerializer(serializers.Serializer):
+    asset_tag = serializers.CharField(max_length=32)
+    employee_code = serializers.CharField(max_length=16)
+    due_at = serializers.DateTimeField()
+
+    def validate_due_at(self, value):
+        now = timezone.now()
+        if value <= now:
+            raise serializers.ValidationError("due_at must be in the future.")
+        if value > now + timedelta(days=MAX_LOAN_DAYS):
+            raise serializers.ValidationError(
+                f"due_at must be no more than {MAX_LOAN_DAYS} days from now."
+            )
+        return value
+
+
+class CheckOutReturnSerializer(serializers.Serializer):
+    condition_note = serializers.CharField(allow_blank=True, required=False, default="")
+    needs_maintenance = serializers.BooleanField(required=False, default=False)

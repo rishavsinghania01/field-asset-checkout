@@ -1,12 +1,20 @@
 from django.db import DatabaseError, connection
 from django.db.models import Prefetch
 from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from . import services
 from .models import Asset, CheckOut
-from .serializers import AssetDetailSerializer, AssetSerializer
+from .serializers import (
+    AssetDetailSerializer,
+    AssetSerializer,
+    CheckOutCreateSerializer,
+    CheckOutReturnSerializer,
+    CheckOutSerializer,
+)
 
 
 class AssetViewSet(
@@ -45,6 +53,32 @@ class AssetViewSet(
                 )
             )
         return qs
+
+
+class CheckOutViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
+    """
+    POST /checkouts/               body {asset_tag, employee_code, due_at} -> 201
+    POST /checkouts/{id}/return/   body {condition_note, needs_maintenance} -> 200
+    GET  /checkouts/ and /checkouts/{id}/ are read-only conveniences.
+    """
+
+    queryset = CheckOut.objects.select_related("asset", "employee")
+    serializer_class = CheckOutSerializer
+    filterset_fields = ("employee__employee_code", "asset__asset_tag")
+    ordering = ("-checked_out_at",)
+
+    def create(self, request, *args, **kwargs):
+        payload = CheckOutCreateSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        checkout = services.check_out_asset(**payload.validated_data)
+        return Response(CheckOutSerializer(checkout).data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["post"], url_path="return")
+    def return_(self, request, pk=None):
+        payload = CheckOutReturnSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        checkout = services.return_checkout(checkout_id=int(pk), **payload.validated_data)
+        return Response(CheckOutSerializer(checkout).data, status=status.HTTP_200_OK)
 
 
 class HealthView(APIView):
