@@ -2,11 +2,13 @@ from django.db import DatabaseError, connection
 from django.db.models import Prefetch
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from . import services
+from . import queries, services
 from .models import Asset, CheckOut
 from .serializers import (
     AssetDetailSerializer,
@@ -14,6 +16,8 @@ from .serializers import (
     CheckOutCreateSerializer,
     CheckOutReturnSerializer,
     CheckOutSerializer,
+    EmployeeSummarySerializer,
+    OverdueRowSerializer,
 )
 
 
@@ -79,6 +83,48 @@ class CheckOutViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, viewsets
         payload.is_valid(raise_exception=True)
         checkout = services.return_checkout(checkout_id=int(pk), **payload.validated_data)
         return Response(CheckOutSerializer(checkout).data, status=status.HTTP_200_OK)
+
+
+class EmployeeSummaryView(APIView):
+    """
+    GET /employees/{employee_code}/summary/
+
+    Four numbers computed by one aggregate query (see queries.employee_summary).
+    """
+
+    def get(self, request, employee_code):
+        employee = queries.employee_summary(employee_code)
+        if employee is None:
+            raise NotFound(f"Employee {employee_code!r} not found.")
+        mean_hold = employee.mean_hold
+        data = {
+            "employee_code": employee.employee_code,
+            "full_name": employee.full_name,
+            "is_active": employee.is_active,
+            "lifetime_checkouts": employee.lifetime_checkouts,
+            "currently_held": employee.currently_held,
+            "currently_overdue": employee.currently_overdue,
+            "mean_hold_days": (
+                round(mean_hold.total_seconds() / 86400, 2) if mean_hold is not None else None
+            ),
+        }
+        return Response(EmployeeSummarySerializer(data).data)
+
+
+class OverdueReportView(ListAPIView):
+    """
+    GET /reports/overdue/
+
+    Open check-outs past due, most overdue first. One query for the page
+    (plus the pagination count): asset and employee come via select_related,
+    days_overdue via an annotation.
+    """
+
+    serializer_class = OverdueRowSerializer
+    filter_backends = ()
+
+    def get_queryset(self):
+        return queries.overdue_checkouts()
 
 
 class HealthView(APIView):

@@ -9,5 +9,11 @@ router.register("checkouts", views.CheckOutViewSet, basename="checkout")
 
 urlpatterns = [
     path("health/", views.HealthView.as_view(), name="health"),
+    path(
+        "employees/<str:employee_code>/summary/",
+        views.EmployeeSummaryView.as_view(),
+        name="employee-summary",
+    ),
+    path("reports/overdue/", views.OverdueReportView.as_view(), name="overdue-report"),
 ]
 urlpatterns += router.urls

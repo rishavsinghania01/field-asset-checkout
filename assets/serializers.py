@@ -89,3 +89,27 @@ class CheckOutCreateSerializer(serializers.Serializer):
 class CheckOutReturnSerializer(serializers.Serializer):
     condition_note = serializers.CharField(allow_blank=True, required=False, default="")
     needs_maintenance = serializers.BooleanField(required=False, default=False)
+
+
+class EmployeeSummarySerializer(serializers.Serializer):
+    employee_code = serializers.CharField()
+    full_name = serializers.CharField()
+    is_active = serializers.BooleanField()
+    lifetime_checkouts = serializers.IntegerField()
+    currently_held = serializers.IntegerField()
+    currently_overdue = serializers.IntegerField()
+    mean_hold_days = serializers.FloatField(allow_null=True)
+
+
+class OverdueRowSerializer(serializers.Serializer):
+    checkout_id = serializers.IntegerField(source="id")
+    asset_name = serializers.CharField(source="asset.name")
+    asset_tag = serializers.CharField(source="asset.asset_tag")
+    employee_code = serializers.CharField(source="employee.employee_code")
+    employee_name = serializers.CharField(source="employee.full_name")
+    due_at = serializers.DateTimeField()
+    days_overdue = serializers.SerializerMethodField()
+
+    def get_days_overdue(self, obj):
+        # `overdue_for` is annotated by the query; whole days, floor.
+        return obj.overdue_for.days
