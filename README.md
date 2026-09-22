@@ -2,7 +2,7 @@
 
 A small Django REST API that tracks physical equipment (cameras, laptops, sensors, vehicles) being checked out to and returned by employees. Built for the Artikate backend take-home.
 
-**Screen recording:** _link to be added_
+**Screen recording:** [_link to be added_](https://drive.google.com/file/d/1VjGXn0bwWbqqK60xx7L-teLJhWzfgFUp/view?usp=sharing)
 
 - Parts B, C and D are in [`ANSWERS.md`](ANSWERS.md).
 - Stack: Python 3.12, Django 5.2, DRF 3.18, PostgreSQL 16, Celery 5 + Redis 7, pytest-django.
